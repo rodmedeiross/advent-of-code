@@ -27,7 +27,6 @@ fn process_data(data: Vec<&str>) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::lexer::read_lines;
 
     #[test]
     fn should_return_sum_of_first_and_last_digits() {
