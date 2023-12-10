@@ -1,0 +1,18 @@
+[package]
+name = "day_05"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.release]
+opt-level = 3
+
+[dependencies]
+rayon = "*"
+indicatif = {version = "*", features = ["rayon"]}
+nom = "7"
+itertools = { version = "*"}
+miette = { version = "*"}
+thiserror = { version = "*"}
+dhat = { version = "*"}
+nom-supreme ={ version = "*"}

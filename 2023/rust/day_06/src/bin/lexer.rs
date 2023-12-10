@@ -64,7 +64,7 @@ impl FromStr for GameStatus {
                 .iter()
                 .scan(0..0, |state, &num| Some(state.start..num))
                 .collect();
-            // Its not necessary, buy I need learn more aboute Iter
+            // Its not necessary, buy I need learn more about Iter
 
             let distance_values: Vec<usize> = distance[0].to_vec();
 
