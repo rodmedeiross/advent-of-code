@@ -9,7 +9,7 @@ fn main() {
 
 fn process_data(data: &str) -> usize {
     let map = data.parse::<WasteLand>().unwrap();
-    map.walk_and_count()
+    map.par_walk_and_count()
 }
 
 #[cfg(test)]
@@ -19,24 +19,17 @@ mod tests {
 
     #[rstest]
     #[case(
-        "LLR
+        "LR
 
-    AAA = (BBB, BBB)
-    BBB = (AAA, ZZZ)
-    ZZZ = (ZZZ, ZZZ)",
+        11A = (11B, XXX)
+        11B = (XXX, 11Z)
+        11Z = (11B, XXX)
+        22A = (22B, XXX)
+        22B = (22C, 22C)
+        22C = (22Z, 22Z)
+        22Z = (22B, 22B)
+        XXX = (XXX, XXX)",
         "6"
-    )]
-    #[case(
-        "RL
-
-        AAA = (BBB, CCC)
-        BBB = (DDD, EEE)
-        CCC = (ZZZ, GGG)
-        DDD = (DDD, DDD)
-        EEE = (EEE, EEE)
-        GGG = (GGG, GGG)
-        ZZZ = (ZZZ, ZZZ)",
-        "2"
     )]
     fn should_return_sum_of_path_walk(#[case] input: &str, #[case] expected: &str) {
         let result = process_data(input).to_string();
