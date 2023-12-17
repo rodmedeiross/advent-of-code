@@ -8,7 +8,16 @@ fn main() {
 }
 
 fn process_data(data: &str) -> usize {
-    data.parse::<PipeGrid>().unwrap().walk()
+    let puzzles = data.parse::<GridPuzzle>().unwrap().puzzles;
+
+    let mut total = 0_usize;
+    for puzz in puzzles {
+        let op = puzz.generate_combinations();
+        let count = op.iter().filter(|op| puzz.check_options(op)).count();
+
+        total += count as usize;
+    }
+    total
 }
 
 #[cfg(test)]
@@ -23,8 +32,7 @@ mod tests {
         ?#?#?#?#?#?#?#? 1,3,1,6
         ????.#...#... 4,1,1
         ????.######..#####. 1,6,5
-        ?###???????? 3,2,1
-        ",
+        ?###???????? 3,2,1",
         "21"
     )]
     fn should_return_sum_of_path_walk(#[case] input: &str, #[case] expected: &str) {
