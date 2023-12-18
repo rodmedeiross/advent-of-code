@@ -9,3 +9,4 @@ edition = "2021"
 rstest = "*"
 rayon = "*"
 itertools = "0.12.0"
+indicatif = {version = "*", features = ["rayon"]}
