@@ -1,3 +1,4 @@
+
 use crate::lexer::*;
 mod lexer;
 
@@ -8,7 +9,7 @@ fn main() {
 }
 
 fn process_data(data: &str) -> usize {
-    data.parse::<RockSchema>().unwrap().rolllouutttt()
+    43
 }
 
 #[cfg(test)]
@@ -18,19 +19,21 @@ mod tests {
 
     #[rstest]
     #[case(
-        "O....#....
-        O.OO#....#
-        .....##...
-        OO.#O....O
-        .O.....O#.
-        O.#..O.#.#
-        ..O..#O..O
-        .......O..
-        #....###..
-        #OO..#....",
-        "136"
+3215453535623
+3255245654254
+3446585845452
+4546657867536
+1438598798454
+4457876987766
+3637877979653
+4654967986887
+4564679986453
+1224686865563
+2546548887735
+4322674655533",
+        "102"
     )]
-    fn should_return_sum_of_path_walk(#[case] input: &str, #[case] expected: &str) {
+    fn should_return_valid_result(#[case] input: &str, #[case] expected: &str) {
         let result = process_data(input).to_string();
         assert_eq!(result, expected);
     }

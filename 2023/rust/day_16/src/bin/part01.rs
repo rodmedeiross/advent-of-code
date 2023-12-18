@@ -8,7 +8,7 @@ fn main() {
 }
 
 fn process_data(data: &str) -> usize {
-    data.parse::<RockSchema>().unwrap().rolllouutttt()
+    43
 }
 
 #[cfg(test)]
@@ -18,19 +18,19 @@ mod tests {
 
     #[rstest]
     #[case(
-        "O....#....
-        O.OO#....#
-        .....##...
-        OO.#O....O
-        .O.....O#.
-        O.#..O.#.#
-        ..O..#O..O
-        .......O..
-        #....###..
-        #OO..#....",
-        "136"
+        r#".|...\....
+|.-.\.....
+.....|-...
+........|.
+..........
+.........\
+..../.\\..
+.-.-/..|..
+.|....-|.\
+..//.|...."#,
+        "46"
     )]
-    fn should_return_sum_of_path_walk(#[case] input: &str, #[case] expected: &str) {
+    fn should_return_valid_result(#[case] input: &str, #[case] expected: &str) {
         let result = process_data(input).to_string();
         assert_eq!(result, expected);
     }
