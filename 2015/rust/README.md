@@ -2,7 +2,7 @@
 
 ## Info
 
-This is my [Advent Of Code 2023](https://adventofcode.com/2015) and choose Rust btw...
+This is my [Advent Of Code 2015](https://adventofcode.com/2015) and choose Rust btw...
 
 ## Structure:
 
@@ -22,7 +22,7 @@ This is my [Advent Of Code 2023](https://adventofcode.com/2015) and choose Rust 
 |   |   |-- ...
 |-- day-02
 |   |-- bin
-|   |   |-- ...
+|   |   |-- results
 |-- ...
 ```   
 
@@ -30,7 +30,5 @@ Every day is divided into parts if it's necessary...
 
 ## Enjoy
 I hope this repository helps others or provides a little incentive to participate in Advent Of Code this year.
-
-Its not a SpeedRun btw
 
 Feel free to adjust as needed for your preferences and project specifics!
