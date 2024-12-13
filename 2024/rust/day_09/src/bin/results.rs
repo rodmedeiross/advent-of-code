@@ -90,7 +90,7 @@ fn get_arrange_part02(input: Vec<Vec<isize>>) -> Vec<Vec<isize>> {
     let mut arrange = input.clone();
     // dbg!(&input);
 
-    for (k, chunk) in reverse.enumerate() {
+    for (_, chunk) in reverse.enumerate() {
         let Some((i, _)) = arrange.iter().enumerate().find(|(_, empty_space)| {
             empty_space.len() >= chunk.len() && empty_space.iter().all(|x| *x == -1)
         }) else {
@@ -101,30 +101,31 @@ fn get_arrange_part02(input: Vec<Vec<isize>>) -> Vec<Vec<isize>> {
             continue;
         }
 
-        if i > arrange.len() - k {
-            continue;
-        }
-
-        // dbg!(chunk, i, k, empty, arrange.len() - k);
-
-        let empty_sub = &arrange.remove(i);
-
-        // dbg!(empty_sub);
-        let space = empty_sub.len() - chunk.len();
-
-        if space > 0 {
-            let new_empty = vec![-1; space];
-            // dbg!(&new_empty, i);
-            arrange.insert(i, new_empty);
-        }
-
         let (r, _) = arrange
             .iter()
             .enumerate()
             .find(|(_, v)| v.iter().all(|x| *x == chunk[0]))
             .unwrap();
 
-        // dbg!(&arrange, r);
+        if i > r {
+            continue;
+        }
+
+        let empty_sub = &arrange.remove(i);
+
+        let space = empty_sub.len() - chunk.len();
+
+        if space > 0 {
+            let new_empty = vec![-1; space];
+            arrange.insert(i, new_empty);
+        }
+
+        // check again after insert
+        let (r, _) = arrange
+            .iter()
+            .enumerate()
+            .find(|(_, v)| v.iter().all(|x| *x == chunk[0]))
+            .unwrap();
 
         arrange.remove(r);
         arrange.insert(r, vec![-1; chunk.len()]);
