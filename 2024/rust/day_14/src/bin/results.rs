@@ -32,6 +32,16 @@ impl Robot {
             range: (i[2], i[3]),
         }
     }
+
+    fn walk(&self, times: isize, x_max: isize, y_max: isize) -> Self {
+        Robot {
+            position: (
+                ((self.position.0 + (self.range.0 * times)) % x_max + x_max) % x_max,
+                ((self.position.1 + (self.range.1 * times)) % y_max + y_max) % y_max,
+            ),
+            range: self.range,
+        }
+    }
 }
 
 fn main() {
@@ -47,7 +57,13 @@ fn process(i: &str) -> usize {
         .map(|line| line.parse::<Robot>().unwrap())
         .collect::<Vec<Robot>>();
 
+    let robots_walked = robots
+        .iter()
+        .map(|robot| robot.walk(100, 11, 7))
+        .collect::<Vec<Robot>>();
+
     dbg!(robots);
+    dbg!(robots_walked);
 
     21
 }
