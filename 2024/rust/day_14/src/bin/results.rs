@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 const REGEX_PARSE: &str = r"(\-)*\d+";
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 struct Robot {
     position: (isize, isize),
     range: (isize, isize),
@@ -44,14 +44,18 @@ impl Robot {
     }
 }
 
+fn div_rem(a: isize, b: isize) -> (isize, isize) {
+    (a / b, a % b)
+}
+
 fn main() {
     let input = include_str!("input.txt");
-    let result = process(input);
+    let result = process(input, 101, 103);
 
     println!("Result: {}", result);
 }
 
-fn process(i: &str) -> usize {
+fn process(i: &str, x_range: isize, y_range: isize) -> usize {
     let robots = i
         .lines()
         .map(|line| line.parse::<Robot>().unwrap())
@@ -59,13 +63,28 @@ fn process(i: &str) -> usize {
 
     let robots_walked = robots
         .iter()
-        .map(|robot| robot.walk(100, 11, 7))
+        .map(|robot| robot.walk(100, x_range, y_range))
         .collect::<Vec<Robot>>();
 
-    dbg!(robots);
-    dbg!(robots_walked);
+    let x_div = div_rem(x_range, 2);
+    let y_div = div_rem(y_range, 2);
 
-    21
+    let (mut quadrant_1_count, mut quadrant_2_count, mut quadrant_3_count, mut quadrant_4_count) =
+        (0, 0, 0, 0);
+
+    robots_walked.iter().for_each(|robot| {
+        if robot.position.0 < x_div.0 && robot.position.1 < y_div.0 {
+            quadrant_1_count += 1;
+        } else if robot.position.0 < x_div.0 && robot.position.1 >= y_div.0 + y_div.1 {
+            quadrant_2_count += 1;
+        } else if robot.position.0 >= x_div.0 + x_div.1 && robot.position.1 < y_div.0 {
+            quadrant_3_count += 1;
+        } else if robot.position.0 >= x_div.0 + x_div.1 && robot.position.1 >= y_div.0 + y_div.1 {
+            quadrant_4_count += 1;
+        }
+    });
+
+    quadrant_1_count * quadrant_2_count * quadrant_3_count * quadrant_4_count
 }
 
 #[cfg(test)]
@@ -90,7 +109,7 @@ p=9,5 v=-3,-3",
         12
     )]
     fn number_of_robots_by_quadrant(#[case] i: &str, #[case] expected: usize) {
-        let result = process(i);
+        let result = process(i, 11, 7);
         assert_eq!(result, expected);
     }
 }
