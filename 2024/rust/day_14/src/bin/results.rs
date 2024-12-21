@@ -1,4 +1,5 @@
 use regex::Regex;
+use std::collections::HashSet;
 use std::str::FromStr;
 
 const REGEX_PARSE: &str = r"(\-)*\d+";
@@ -44,6 +45,17 @@ impl Robot {
     }
 }
 
+trait RobotChecks {
+    fn check(&self) -> bool;
+}
+
+impl RobotChecks for Vec<Robot> {
+    fn check(&self) -> bool {
+        let mut seen = HashSet::new();
+        self.iter().all(|robot| seen.insert(robot.position))
+    }
+}
+
 fn div_rem(a: isize, b: isize) -> (isize, isize) {
     (a / b, a % b)
 }
@@ -51,8 +63,9 @@ fn div_rem(a: isize, b: isize) -> (isize, isize) {
 fn main() {
     let input = include_str!("input.txt");
     let result = process(input, 101, 103);
+    let result2 = process_part2(input, 101, 103);
 
-    println!("Result: {}", result);
+    println!("Result: {}, {}", result, result2);
 }
 
 fn process(i: &str, x_range: isize, y_range: isize) -> usize {
@@ -85,6 +98,29 @@ fn process(i: &str, x_range: isize, y_range: isize) -> usize {
     });
 
     quadrant_1_count * quadrant_2_count * quadrant_3_count * quadrant_4_count
+}
+
+fn process_part2(i: &str, x_range: isize, y_range: isize) -> usize {
+    let robots = i
+        .lines()
+        .map(|line| line.parse::<Robot>().unwrap())
+        .collect::<Vec<Robot>>();
+
+    let mut i = 0;
+    loop {
+        let robots_walked = robots
+            .iter()
+            .map(|robot| robot.walk(i, x_range, y_range))
+            .collect::<Vec<Robot>>();
+
+        if robots_walked.check() {
+            break;
+        }
+
+        i += 1;
+    }
+
+    i as usize
 }
 
 #[cfg(test)]
