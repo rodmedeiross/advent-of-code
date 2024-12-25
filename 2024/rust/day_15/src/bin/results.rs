@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use std::mem::swap;
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum Dir {
     Top,
     Down,
@@ -10,7 +11,7 @@ enum Dir {
     Right,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 enum Item {
     Rock,
     Robot,
@@ -70,13 +71,58 @@ impl TryFrom<char> for Item {
 struct Map {
     grid: HashMap<(isize, isize), Item>,
     dirs: Vec<Dir>,
+    dim: (isize, isize),
+}
+
+impl Map {
+    fn walk(&mut self) -> &Self {
+        let (mut rx, mut ry) = self.get_robot();
+
+        for dir in self.dirs.clone() {
+            let coord = self.push((rx, ry), dir);
+            dbg!(coord);
+        }
+
+        self
+    }
+
+    fn push(&mut self, pos: (isize, isize), dir: Dir) -> (isize, isize) {
+        if let Some(empty) = self.grid.get(&pos) {
+            if *empty == Item::Empty {
+                return pos;
+            }
+        }
+
+        if pos.1 + 1 >= self.dim.1 || pos.1 - 1 <= 0 || pos.0 + 1 >= self.dim.0 || pos.0 - 1 <= 0 {
+            return pos;
+        }
+
+        let new = match dir {
+            Dir::Top => (pos.0, pos.1 - 1),
+            Dir::Down => (pos.0, pos.1 + 1),
+            Dir::Left => (pos.0 - 1, pos.1),
+            Dir::Right => (pos.0 + 1, pos.1),
+        };
+
+        let f = self.push(new, dir);
+
+        f
+    }
+
+    fn get_robot(&self) -> (isize, isize) {
+        self.grid
+            .iter()
+            .find(|&(_, v)| *v == Item::Robot)
+            .map(|(&cord, _)| cord)
+            .unwrap()
+    }
 }
 
 impl FromStr for Map {
     type Err = &'static str;
 
     fn from_str(i: &str) -> Result<Self, Self::Err> {
-        let (grid, dirs) = i
+        let (grid, dirs, dim) = i
             .split_once("\n\n")
             .and_then(|(table, directions)| {
                 let grid = table
@@ -84,11 +130,13 @@ impl FromStr for Map {
                     .enumerate()
                     .flat_map(|(y, line)| {
                         line.chars().enumerate().map(move |(x, ch)| {
-                            dbg!(line, ch);
                             ((x as isize, y as isize), Item::try_from(ch).unwrap())
                         })
                     })
                     .collect::<HashMap<(isize, isize), Item>>();
+
+                let tmp: Vec<&str> = table.lines().collect();
+                let dim = (tmp[0].chars().count() as isize, tmp.len() as isize);
 
                 let dirs = directions
                     .chars()
@@ -101,19 +149,24 @@ impl FromStr for Map {
                     })
                     .collect::<Vec<Dir>>();
 
-                Some((grid, dirs))
+                Some((grid, dirs, dim))
             })
             .unwrap();
 
-        Ok(Map { grid, dirs })
+        Ok(Map { grid, dirs, dim })
     }
 }
 
-fn main() {}
+fn main() {
+    let input = include_str!("input.txt");
+    let result = process_input_p1(input);
+    println!("Result to {}", result);
+}
 
 fn process_input_p1(i: &str) -> usize {
-    let map = i.parse::<Map>().unwrap();
-    dbg!(map);
+    let mut map = i.parse::<Map>().unwrap();
+    map.walk();
+    // dbg!(map);
     21
 }
 
@@ -134,7 +187,31 @@ mod tests {
 ########
 
 <^^>>>vv<v>>v<<",
-        10092
+        2028
+    )]
+    #[case(
+        "##########
+#..O..O.O#
+#......O.#
+#.OO..O.O#
+#..O@..O.#
+#O#..O...#
+#O..O..O.#
+#.OO.O.OO#
+#....O...#
+##########
+
+<vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
+vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
+><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
+<<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
+^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
+^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
+>^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
+<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
+^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
+v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^",
+        100092
     )]
     fn should_walk_and_get_gps(#[case] i: &str, #[case] expected: usize) {
         let result = process_input_p1(i);
