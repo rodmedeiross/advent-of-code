@@ -11,9 +11,11 @@ compareSucessor f xs = zipWith f xs (tail xs)
 
 isRange :: (Ord a, Num a) => a -> a -> Char
 isRange x y
-  | x < y && abs (x - y) <= 3 = '<'
-  | x > y && abs (x - y) <= 3 = '>'
+  | x < y && calc <= 3 = '<'
+  | x > y && calc <= 3 = '>'
   | otherwise = '='
+  where
+    calc = abs (x - y)
 
 allSame :: (Eq a) => [a] -> Bool
 allSame [] = True
@@ -26,5 +28,4 @@ main = do
   let resultList = [compareSucessor isRange row | row <- numbers]
   let result = [x | x <- resultList, allSame x]
 
-  -- let result = [((x, y), item) | (y, row) <- zip [0 ..] numbers, (x, item) <- zip [0 ..] row]
   print $ length result
