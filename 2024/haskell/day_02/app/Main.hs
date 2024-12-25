@@ -3,8 +3,12 @@ module Main where
 processFile :: String -> [[Int]]
 processFile input =
   let rows = lines input
-      items = map (map read . words) rows
-   in items
+   in map (map read . words) rows
+
+processFile' :: String -> [[Int]]
+processFile' input = map (map read . words) rows
+  where
+    rows = lines input
 
 compareSucessor :: (a -> a -> b) -> [a] -> [b]
 compareSucessor f xs = zipWith f xs (tail xs)
@@ -24,7 +28,7 @@ allSame (x : xs) = all (== x) xs
 main :: IO ()
 main = do
   input <- readFile "input.txt"
-  let numbers = processFile input
+  let numbers = processFile' input
   let resultList = [compareSucessor isRange row | row <- numbers]
   let result = [x | x <- resultList, allSame x]
 
