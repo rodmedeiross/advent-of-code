@@ -1,6 +1,4 @@
-use std::collections::HashMap;
 use std::convert::TryFrom;
-use std::mem::swap;
 use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone)]
@@ -69,52 +67,182 @@ impl TryFrom<char> for Item {
 
 #[derive(Debug)]
 struct Map {
-    grid: HashMap<(isize, isize), Item>,
+    grid: Vec<Vec<Item>>,
     dirs: Vec<Dir>,
-    dim: (isize, isize),
 }
 
 impl Map {
-    fn walk(&mut self) -> &Self {
-        let (mut rx, mut ry) = self.get_robot();
+    fn walk(&mut self) {
+        let mut rp = find(&self.grid, Item::Robot).unwrap();
 
-        for dir in self.dirs.clone() {
-            let coord = self.push((rx, ry), dir);
-            dbg!(coord);
-        }
+        for dir in &self.dirs {
+            match dir {
+                Dir::Right => {
+                    if rp.0 + 1 <= self.grid[rp.1].len() {
+                        let next = self.grid[rp.1][rp.0 + 1];
 
-        self
-    }
+                        match next {
+                            Item::Empty => {
+                                self.grid[rp.1][rp.0 + 1] = Item::Robot;
+                                self.grid[rp.1][rp.0] = Item::Empty;
+                                rp = (rp.0 + 1, rp.1)
+                            }
+                            Item::Wall => {
+                                //Nothing
+                            }
+                            Item::Rock => {
+                                let (mut ix, iy) = (rp.0 + 2, rp.1);
+                                let mut inner_next = self.grid[iy][ix];
+                                while inner_next != Item::Empty {
+                                    if inner_next == Item::Wall {
+                                        ix = rp.0 + 1;
+                                        break;
+                                    }
 
-    fn push(&mut self, pos: (isize, isize), dir: Dir) -> (isize, isize) {
-        if let Some(empty) = self.grid.get(&pos) {
-            if *empty == Item::Empty {
-                return pos;
+                                    ix += 1;
+                                    inner_next = self.grid[iy][ix];
+                                }
+                                //swap last inner_next(empty) with next
+                                self.grid[rp.1][rp.0 + 1] = Item::Empty;
+                                self.grid[iy][ix] = Item::Rock; // put rock back with the same pos
+
+                                if self.grid[rp.1][rp.0 + 1] == Item::Empty {
+                                    self.grid[rp.1][rp.0 + 1] = Item::Robot;
+                                    self.grid[rp.1][rp.0] = Item::Empty;
+                                    rp = (rp.0 + 1, rp.1)
+                                }
+                            }
+                            _ => panic!("Priviet"),
+                        }
+                    }
+                }
+                Dir::Left => {
+                    if rp.0 as isize - 1 >= 0 {
+                        let next = self.grid[rp.1][rp.0 - 1];
+
+                        match next {
+                            Item::Empty => {
+                                self.grid[rp.1][rp.0 - 1] = Item::Robot;
+                                self.grid[rp.1][rp.0] = Item::Empty;
+                                rp = (rp.0 - 1, rp.1)
+                            }
+                            Item::Wall => {
+                                //Nothing
+                            }
+                            Item::Rock => {
+                                let (mut ix, iy) = (rp.0 - 2, rp.1);
+                                let mut inner_next = self.grid[iy][ix];
+                                while inner_next != Item::Empty {
+                                    if inner_next == Item::Wall {
+                                        ix = rp.0 - 1;
+                                        break;
+                                    }
+
+                                    ix -= 1;
+                                    inner_next = self.grid[iy][ix];
+                                }
+                                //swap last inner_next(empty) with next
+                                self.grid[rp.1][rp.0 - 1] = Item::Empty;
+                                self.grid[iy][ix] = Item::Rock;
+
+                                if self.grid[rp.1][rp.0 - 1] == Item::Empty {
+                                    self.grid[rp.1][rp.0 - 1] = Item::Robot;
+                                    self.grid[rp.1][rp.0] = Item::Empty;
+                                    rp = (rp.0 - 1, rp.1)
+                                }
+                            }
+                            _ => panic!("Priviet"),
+                        }
+                    }
+                }
+                Dir::Top => {
+                    if rp.1 as isize - 1 >= 0 {
+                        let next = self.grid[rp.1 - 1][rp.0];
+
+                        match next {
+                            Item::Empty => {
+                                self.grid[rp.1 - 1][rp.0] = Item::Robot;
+                                self.grid[rp.1][rp.0] = Item::Empty;
+                                rp = (rp.0, rp.1 - 1)
+                            }
+                            Item::Wall => {
+                                //Nothing
+                            }
+                            Item::Rock => {
+                                let (ix, mut iy) = (rp.0, rp.1 - 2);
+                                let mut inner_next = self.grid[iy][ix];
+                                while inner_next != Item::Empty {
+                                    if inner_next == Item::Wall {
+                                        iy = rp.1 - 1;
+                                        break;
+                                    }
+
+                                    iy -= 1;
+                                    inner_next = self.grid[iy][ix];
+                                }
+                                //swap last inner_next(empty) with next
+                                self.grid[rp.1 - 1][rp.0] = Item::Empty;
+                                self.grid[iy][ix] = Item::Rock;
+
+                                if self.grid[rp.1 - 1][rp.0] == Item::Empty {
+                                    self.grid[rp.1 - 1][rp.0] = Item::Robot;
+                                    self.grid[rp.1][rp.0] = Item::Empty;
+                                    rp = (rp.0, rp.1 - 1)
+                                }
+                            }
+                            _ => panic!("Priviet"),
+                        }
+                    }
+                }
+                Dir::Down => {
+                    if rp.1 + 1 <= self.grid.len() {
+                        let next = self.grid[rp.1 + 1][rp.0];
+
+                        match next {
+                            Item::Empty => {
+                                self.grid[rp.1 + 1][rp.0] = Item::Robot;
+                                self.grid[rp.1][rp.0] = Item::Empty;
+                                rp = (rp.0, rp.1 + 1)
+                            }
+                            Item::Wall => {
+                                //Nothing
+                            }
+                            Item::Rock => {
+                                let (ix, mut iy) = (rp.0, rp.1 + 2);
+                                let mut inner_next = self.grid[iy][ix];
+                                while inner_next != Item::Empty {
+                                    if inner_next == Item::Wall {
+                                        iy = rp.1 + 1;
+                                        break;
+                                    }
+
+                                    iy += 1;
+                                    inner_next = self.grid[iy][ix];
+                                }
+                                //swap last inner_next(empty) with next
+                                self.grid[rp.1 + 1][rp.0] = Item::Empty;
+                                self.grid[iy][ix] = Item::Rock;
+
+                                if self.grid[rp.1 + 1][rp.0] == Item::Empty {
+                                    self.grid[rp.1 + 1][rp.0] = Item::Robot;
+                                    self.grid[rp.1][rp.0] = Item::Empty;
+                                    rp = (rp.0, rp.1 + 1)
+                                }
+                            }
+                            _ => panic!("Priviet"),
+                        }
+                    }
+                }
             }
         }
-
-        if pos.1 + 1 >= self.dim.1 || pos.1 - 1 <= 0 || pos.0 + 1 >= self.dim.0 || pos.0 - 1 <= 0 {
-            return pos;
-        }
-
-        let new = match dir {
-            Dir::Top => (pos.0, pos.1 - 1),
-            Dir::Down => (pos.0, pos.1 + 1),
-            Dir::Left => (pos.0 - 1, pos.1),
-            Dir::Right => (pos.0 + 1, pos.1),
-        };
-
-        let f = self.push(new, dir);
-
-        f
     }
 
-    fn get_robot(&self) -> (isize, isize) {
-        self.grid
-            .iter()
-            .find(|&(_, v)| *v == Item::Robot)
-            .map(|(&cord, _)| cord)
-            .unwrap()
+    fn print_grid(&self) {
+        for line in &self.grid {
+            let fl = line.iter().map(|i| i.symbol()).collect::<String>();
+            print!("{:?}\n", fl);
+        }
+        println!("\n")
     }
 }
 
@@ -122,21 +250,17 @@ impl FromStr for Map {
     type Err = &'static str;
 
     fn from_str(i: &str) -> Result<Self, Self::Err> {
-        let (grid, dirs, dim) = i
+        let (grid, dirs) = i
             .split_once("\n\n")
             .and_then(|(table, directions)| {
                 let grid = table
                     .lines()
-                    .enumerate()
-                    .flat_map(|(y, line)| {
-                        line.chars().enumerate().map(move |(x, ch)| {
-                            ((x as isize, y as isize), Item::try_from(ch).unwrap())
-                        })
+                    .map(|line| {
+                        line.chars()
+                            .map(|ch| Item::try_from(ch).unwrap())
+                            .collect::<Vec<Item>>()
                     })
-                    .collect::<HashMap<(isize, isize), Item>>();
-
-                let tmp: Vec<&str> = table.lines().collect();
-                let dim = (tmp[0].chars().count() as isize, tmp.len() as isize);
+                    .collect::<Vec<Vec<Item>>>();
 
                 let dirs = directions
                     .chars()
@@ -149,12 +273,21 @@ impl FromStr for Map {
                     })
                     .collect::<Vec<Dir>>();
 
-                Some((grid, dirs, dim))
+                Some((grid, dirs))
             })
             .unwrap();
 
-        Ok(Map { grid, dirs, dim })
+        Ok(Map { grid, dirs })
     }
+}
+
+fn find<T: PartialEq>(v: &Vec<Vec<T>>, target: T) -> Option<(usize, usize)> {
+    v.iter().enumerate().find_map(|(y, l)| {
+        l.iter()
+            .enumerate()
+            .find(|(_, item)| **item == target)
+            .map(|(x, _)| (x, y))
+    })
 }
 
 fn main() {
@@ -165,8 +298,11 @@ fn main() {
 
 fn process_input_p1(i: &str) -> usize {
     let mut map = i.parse::<Map>().unwrap();
+    // dbg!(&map.grid);
+    map.print_grid();
     map.walk();
-    // dbg!(map);
+    map.print_grid();
+    // dbg!(map.grid);
     21
 }
 
