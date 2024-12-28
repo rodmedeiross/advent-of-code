@@ -17,17 +17,6 @@ enum Item {
     Empty,
 }
 
-impl Dir {
-    fn symbol(&self) -> char {
-        match self {
-            Dir::Top => '^',
-            Dir::Down => 'v',
-            Dir::Left => '<',
-            Dir::Right => '>',
-        }
-    }
-}
-
 impl TryFrom<char> for Dir {
     type Error = &'static str;
     fn try_from(c: char) -> Result<Self, Self::Error> {
@@ -244,6 +233,19 @@ impl Map {
         }
         println!("\n")
     }
+
+    fn calc_gps(&self) -> usize {
+        let mut result = 0;
+        for (y, line) in self.grid.iter().enumerate() {
+            for (x, item) in line.iter().enumerate() {
+                if *item == Item::Rock {
+                    result += (100 * y) + x
+                }
+            }
+        }
+
+        result
+    }
 }
 
 impl FromStr for Map {
@@ -298,12 +300,10 @@ fn main() {
 
 fn process_input_p1(i: &str) -> usize {
     let mut map = i.parse::<Map>().unwrap();
-    // dbg!(&map.grid);
     map.print_grid();
     map.walk();
     map.print_grid();
-    // dbg!(map.grid);
-    21
+    map.calc_gps()
 }
 
 #[cfg(test)]
@@ -347,7 +347,7 @@ vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
 <><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
 ^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
 v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^",
-        100092
+        10092
     )]
     fn should_walk_and_get_gps(#[case] i: &str, #[case] expected: usize) {
         let result = process_input_p1(i);
