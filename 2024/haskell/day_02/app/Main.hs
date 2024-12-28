@@ -21,15 +21,30 @@ isRange x y
   where
     calc = abs (x - y)
 
+isRange' :: (Ord a, Num a) => a -> a -> Bool
+isRange' x y
+  | x < y && calc <= 3 = True
+  | x > y && calc <= 3 = True
+  | otherwise = False
+  where
+    calc = abs (x - y)
+
 allSame :: (Eq a) => [a] -> Bool
 allSame [] = True
 allSame (x : xs) = all (== x) xs
 
+removeOne :: [a] -> [[a]]
+removeOne xs = [take i xs ++ drop (i + 1) xs | i <- [0 .. length xs - 1]]
+
 main :: IO ()
 main = do
-  input <- readFile "input.txt"
+  input <- readFile "test.txt"
   let numbers = processFile' input
-  let resultList = [compareSucessor isRange row | row <- numbers]
-  let result = [x | x <- resultList, allSame x]
 
-  print $ length result
+  let resultList1 = [compareSucessor isRange row | row <- numbers]
+   in print $ length [x | x <- resultList1, allSame x]
+
+  let resultList2 = [removeOne row | row <- numbers]
+      filteredItems = [[compareSucessor isRange y | y <- item] | item <- resultList2]
+      result = [x | x <- filteredItems, any allSame x]
+   in print $ length result
