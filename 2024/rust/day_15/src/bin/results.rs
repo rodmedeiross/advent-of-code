@@ -234,7 +234,7 @@ impl Map {
         println!("\n")
     }
 
-    fn calc_gps(&self) -> usize {
+    fn calc_gps_p1(&self) -> usize {
         let mut result = 0;
         for (y, line) in self.grid.iter().enumerate() {
             for (x, item) in line.iter().enumerate() {
@@ -303,7 +303,7 @@ fn process_input_p1(i: &str) -> usize {
     map.print_grid();
     map.walk();
     map.print_grid();
-    map.calc_gps()
+    map.calc_gps_p1()
 }
 
 #[cfg(test)]

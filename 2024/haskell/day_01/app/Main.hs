@@ -1,13 +1,13 @@
 module Main where
 
-import qualified Data.HashMap.Strict as HM
+import Data.HashMap.Strict qualified as HM
 import Data.Hashable (Hashable)
 import Data.List (foldl', sort)
 
 processFile :: String -> ([Int], [Int])
 processFile contents =
   let rows = lines contents
-      columns = map (map read . words) rows
+      columns = map $ map read . words rows
       firstColumn = map head columns
       secondColumn = map (!! 1) columns
    in (sort firstColumn, sort secondColumn)
